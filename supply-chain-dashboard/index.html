@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="background:black; color:white;">
+
+<h2>Total Orders: <span id="orders">Loading...</span></h2>
+<h2>Total Inventory: <span id="inventory">Loading...</span></h2>
+
+<canvas id="orderChart"></canvas>
+<canvas id="costChart"></canvas>
+
+<script>
+
+// KPI FIX
+fetch('http://localhost:5000/kpi')
+.then(res => res.json())
+.then(data => {
+    document.getElementById('orders').innerText = data.total_orders;
+    document.getElementById('inventory').innerText = data.total_inventory;
+});
+
+// ORDER STATUS CHART FIX
+fetch('http://localhost:5000/order_status')
+.then(res => res.json())
+.then(data => {
+    new Chart(document.getElementById('orderChart'), {
+        type: 'pie',
+        data: {
+            labels: data.map(d => d.status || "unknown"),
+            datasets: [{
+                label: "Orders",
+                data: data.map(d => d.total)
+            }]
+        }
+    });
+});
+
+// TRANSPORT COST FIX
+fetch('http://localhost:5000/transport_cost')
+.then(res => res.json())
+.then(data => {
+    new Chart(document.getElementById('costChart'), {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.transport_mode || "unknown"),
+            datasets: [{
+                label: "Cost",
+                data: data.map(d => d.avg_cost)
+            }]
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>
